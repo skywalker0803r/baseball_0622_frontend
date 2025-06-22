@@ -1,4 +1,6 @@
-const BASE_URL = process.env.BASE_URL || "http://127.0.0.1:8000"; // ← 這是你的後端根路徑
+// 直接定義 BASE_URL，因為 process.env 在瀏覽器環境中不存在
+// 如果您的後端在不同地址或埠，請修改這裡
+const BASE_URL = "http://127.0.0.1:8000"; // ← 這是你的後端根路徑，請根據實際情況修改
 
 $(function () {
   new UploadSection("#upload-section", BASE_URL).render();
