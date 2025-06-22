@@ -2,7 +2,7 @@ class UploadSection {
   constructor(containerId, baseUrl) {
     this.container = $(containerId);
     this.baseUrl = baseUrl;
-    this.loadingIndicator = null; // Used to store the loading indicator element
+    this.loadingIndicator = null;
   }
 
   render() {
@@ -17,6 +17,7 @@ class UploadSection {
     `);
     this.loadingIndicator = $('#upload-loading-indicator');
     this.bindEvents();
+    this.addVideoErrorHandling(); // Add this line
   }
 
   bindEvents() {
@@ -27,7 +28,7 @@ class UploadSection {
         return;
       }
 
-      this.loadingIndicator.removeClass('hidden').text('上傳中: 0.00%'); // 顯示載入指示器並重置文字
+      this.loadingIndicator.removeClass('hidden').text('上傳中: 0.00%');
       const formData = new FormData();
       formData.append("file", file);
 
@@ -37,7 +38,7 @@ class UploadSection {
         data: formData,
         processData: false,
         contentType: false,
-        xhr: function() { // Add progress event listener
+        xhr: function() {
             const xhr = new window.XMLHttpRequest();
             xhr.upload.addEventListener("progress", function(evt) {
                 if (evt.lengthComputable) {
@@ -48,32 +49,56 @@ class UploadSection {
             return xhr;
         },
         success: (res) => {
-          this.loadingIndicator.addClass('hidden'); // Hide loading indicator
+          this.loadingIndicator.addClass('hidden');
           this.showMessage("上傳成功！影片處理完成。", 'success');
           const videoId = res.video_id;
           const processedVideoUrl = this.baseUrl + res.processed_video_url;
           localStorage.setItem("video_id", videoId);
-          $('#video-player').attr('src', processedVideoUrl);
-          $('#video-player')[0].load(); // Reload the video element to play new source
-          $('#video-player')[0].play(); // Autoplay the processed video
+          
+          const videoPlayer = $('#video-player')[0];
+          videoPlayer.src = processedVideoUrl;
+          videoPlayer.load(); // Reload the video element to play new source
+          // videoPlayer.play() will be called after 'loadeddata' or 'canplaythrough'
 
-          // Trigger custom event for other sections to listen and update
           $(document).trigger('videoProcessed', { videoId: videoId, poseData: res.pose_data });
         },
         error: (xhr, status, error) => {
-          this.loadingIndicator.addClass('hidden'); // Hide loading indicator
+          this.loadingIndicator.addClass('hidden');
           console.error("上傳失敗：", error, xhr.responseText);
           this.showMessage(`上傳失敗，請重試。錯誤: ${error} - ${xhr.responseText}`, 'error');
         },
         complete: () => {
-          // Reset text to default message after completion (success or error)
           this.loadingIndicator.text('影片處理中，請稍候...');
         }
       });
     });
   }
 
-  // Custom message box, replacing alert()
+  addVideoErrorHandling() {
+    const videoPlayer = $('#video-player')[0];
+    if (videoPlayer) {
+      videoPlayer.onerror = (e) => {
+        console.error('Video load error:', e);
+        this.showMessage('影片載入失敗，可能影片格式不支援或檔案損壞。', 'error');
+        // 您也可以嘗試提供原始影片作為備用
+        // const videoId = localStorage.getItem("video_id");
+        // if (videoId) {
+        //   videoPlayer.src = `${this.baseUrl}/static/videos/${videoId}.mp4`; // Assuming original was also mp4
+        //   videoPlayer.load();
+        //   this.showMessage('載入處理過的影片失敗，嘗試載入原始影片。', 'info');
+        // }
+      };
+
+      // Ensure autoplay after enough data is loaded
+      videoPlayer.oncanplaythrough = () => {
+        videoPlayer.play().catch(e => {
+          console.error('Video autoplay failed:', e);
+          this.showMessage('影片自動播放失敗，請點擊播放按鈕。', 'info');
+        });
+      };
+    }
+  }
+
   showMessage(message, type = 'info') {
     const messageDivId = 'app-message-box';
     let messageBox = $(`#${messageDivId}`);
@@ -88,10 +113,9 @@ class UploadSection {
     messageBox.removeClass('bg-blue-500 bg-green-500 bg-red-500').addClass(bgColor).html(message);
     messageBox.removeClass('opacity-0').addClass('opacity-100');
 
-    // Automatically hide message after a few seconds
     setTimeout(() => {
       messageBox.removeClass('opacity-100').addClass('opacity-0');
-    }, 5000); // Hide after 5 seconds
+    }, 5000);
   }
 }
 window.UploadSection = UploadSection;
