@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>棒球投手姿勢分析儀表板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+
+  <h1 class="text-3xl font-bold text-center mb-6">⚾ 棒球投手姿勢分析儀表板</h1>
+
+  <!-- 第一排 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <!-- 影片上傳 -->
+    <div id="upload-section" class="bg-white p-4 rounded-2xl shadow-md"></div>
+
+    <!-- 影片播放 -->
+    <div id="video-section" class="bg-white p-4 rounded-2xl shadow-md"></div>
+  </div>
+
+  <!-- 第二排 -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div id="posture-section" class="bg-white p-4 rounded-2xl shadow-md"></div>
+    <div id="prediction-section" class="bg-white p-4 rounded-2xl shadow-md"></div>
+    <div id="history-section" class="bg-white p-4 rounded-2xl shadow-md overflow-y-auto"></div>
+  </div>
+
+  <!-- 載入各區塊的 jQuery 檔 -->
+    <!-- 1. jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- 2. 模組 -->
+    <script src="js/modules/UploadSection.js"></script>
+    <script src="js/modules/VideoSection.js"></script>
+    <script src="js/modules/PostureSection.js"></script>
+    <script src="js/modules/PredictionSection.js"></script>
+    <script src="js/modules/HistorySection.js"></script>
+
+    <!-- 3. 主程式 -->
+    <script src="js/app.js"></script>
+
+</body>
+</html>
